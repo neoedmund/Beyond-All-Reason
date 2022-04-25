@@ -12,19 +12,17 @@ end
 -- The number of speed gradations should be minimized,
 -- while maintaining suitable fine control around normal (1×) speed
 local speedLevels = {
-	0.1, -- this speed cannot be set, as engine enforces speed > 0.2
-	0.25,
+	0.1,
 	0.5,
 	0.8,
 	1,
-	1.1,
-	1.25,
 	1.5,
-	1.75,
 	2,
 	5,
 	10,
 	20,
+	100,
+	1000
 }
 
 local function setGameSpeed(speed)
