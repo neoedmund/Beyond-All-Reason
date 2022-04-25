@@ -8,4 +8,5 @@ return {
   shortGame = 'BYAR',
   modtype = 1,
   url = "https://www.beyondallreason.info",
+  
 }
