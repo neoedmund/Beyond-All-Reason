@@ -33,11 +33,14 @@ function i18n.setLanguage(language)
 		Spring.SetConfigString("bar_font", asianFont)
 		Spring.SetConfigString("bar_font2", asianFont)
 		Spring.SendCommands("luarules reloadluaui")
-	elseif not asianLanguage and currentFont == asianFont then
-		Spring.SetConfigString("bar_font", "Poppins-Regular.otf")
-		Spring.SetConfigString("bar_font2", "Exo2-SemiBold.otf")
+	elseif not asianLanguage and currentFont ~= asianFont then
+		-- Spring.SetConfigString("bar_font", "Poppins-Regular.otf")
+		-- Spring.SetConfigString("bar_font2", "Exo2-SemiBold.otf")
+		Spring.SetConfigString("bar_font", asianFont)
+		Spring.SetConfigString("bar_font2", asianFont)
 		Spring.SendCommands("luarules reloadluaui")
 	end
+	
 end
 
 return i18n

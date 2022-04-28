@@ -29,10 +29,10 @@ local unitGrids = configs.UnitGrids
 local currentLayout = Spring.GetConfigString("KeyboardLayout", "qwerty")
 local userLayout
 
-local BUILDCAT_ECONOMY = "Economy"
-local BUILDCAT_COMBAT = "Combat"
-local BUILDCAT_UTILITY = "Utility"
-local BUILDCAT_PRODUCTION = "Production"
+local BUILDCAT_ECONOMY = "经济"
+local BUILDCAT_COMBAT = "战斗"
+local BUILDCAT_UTILITY = "工具"
+local BUILDCAT_PRODUCTION = "生产"
 local categoryFontSize
 local pageButtonHeight
 local pageButtonWidth
@@ -41,8 +41,8 @@ local paginatorFontSize
 local paginatorCellHeight
 
 local RESET_MENU_KEY = KEYSYMS.LSHIFT
-local NEXT_PAGE_KEY = "B"
-local PREV_PAGE_KEY = "N"
+local NEXT_PAGE_KEY = "前"
+local PREV_PAGE_KEY = "后"
 local os_clock = os.clock
 
 local Cfgs = {

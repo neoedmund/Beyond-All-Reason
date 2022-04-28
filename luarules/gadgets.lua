@@ -589,7 +589,7 @@ function gadgetHandler:EnableGadget(name)
 		return false
 	end
 	if not ki.active then
-		Spring.Log(LOG_SECTION, LOG.INFO, 'Loading:  ' .. ki.filename)
+		Spring.Log(LOG_SECTION, LOG.INFO, '读取:  ' .. ki.filename)
 		local order = gadgetHandler.orderList[name]
 		if not order or order <= 0 then
 			self.orderList[name] = 1

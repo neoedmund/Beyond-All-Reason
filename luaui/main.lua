@@ -18,7 +18,8 @@ local spSendCommands = Spring.SendCommands
 spSendCommands("ctrlpanel " .. LUAUI_DIRNAME .. "ctrlpanel.txt")
 
 VFS.Include("init.lua", nil, VFS.ZIP)
-Spring.I18N.setLanguage( Spring.GetConfigString('language', 'en') )
+
+Spring.I18N.setLanguage( Spring.GetConfigString('language', 'zh') )
 
 VFS.Include(LUAUI_DIRNAME .. "utils.lua",      nil, VFS.ZIP)
 VFS.Include(LUAUI_DIRNAME .. "setupdefs.lua",  nil, VFS.ZIP)

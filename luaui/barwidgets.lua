@@ -397,7 +397,7 @@ function widgetHandler:Initialize()
 		local name = w.whInfo.name
 		local basename = w.whInfo.basename
 		local source = self.knownWidgets[name].fromZip and "mod: " or "user:"
-		Spring.Echo(string.format("Loading widget from %s  %-18s  <%s> ...", source, name, basename))
+		Spring.Echo(string.format("读取控件 from %s  %-18s  <%s> ...", source, name, basename))
 
 		widgetHandler:InsertWidget(w)
 	end
@@ -857,7 +857,7 @@ function widgetHandler:EnableWidget(name)
 		return false
 	end
 	if not ki.active then
-		Spring.Echo('Loading:  ' .. ki.filename)
+		Spring.Echo('读取:  ' .. ki.filename)
 		local order = widgetHandler.orderList[name]
 		if not order or order <= 0 then
 			self.orderList[name] = 1
