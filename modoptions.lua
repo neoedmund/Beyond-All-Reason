@@ -478,7 +478,7 @@ local options={
 			{key="hard", name="Hard", desc="Hard"},
 			{key="veryhard", name="Very Hard", desc="Very Hard"},
 			{key="epic", name="Epic", desc="Epic"},
-			{key="survival", name="Survival", desc="Endless Mode"}
+			{key="survival", name="Endless", desc="Endless Mode"}
 		}
 	},
 	{
@@ -500,9 +500,9 @@ local options={
 		name   = "Max Queen Arrival (Minutes)",
 		desc   = "Queen will spawn after given time.",
 		type   = "number",
-		def    = 60,
+		def    = 30,
 		min    = 1,
-		max    = 120,
+		max    = 1440,
 		step   = 1,
 		section= "chicken_defense_options",
 	},
@@ -751,11 +751,11 @@ local options={
 		key="assistdronesenabled",
 		name="Assist Drones",
 		type="list",
-		def="scav_only",
+		def="pve_only",
 		section="options",
 		items={
 			{key="enabled", name="Enabled"},
-			{key="scav_only", name="Enabled for Scavengers only"},
+			{key="pve_only", name="Enabled for PvE only"},
 			{key="disabled", name="Disabled"},
 		}
 	},
@@ -776,11 +776,11 @@ local options={
 		key="commanderbuildersenabled",
 		name="Base Construction Turret",
 		type="list",
-		def="scav_only",
+		def="pve_only",
 		section="options",
 		items={
 			{key="enabled", name="Enabled"},
-			{key="scav_only", name="Enabled for Scavengers only"},
+			{key="pve_only", name="Enabled for PvE only"},
 			{key="disabled", name="Disabled"},
 		}
 	},
@@ -1393,6 +1393,15 @@ local options={
 		def  = false,
 	},
 
+	{
+		key		= "unba",
+		name	= "UnbaCom - Totally Rebalanced Commanders (WIP)",
+		desc	= "Defines if commanders level up with xp and gain more power or not",
+		type	= "bool",
+		def		= false,
+		section	= "options_experimental",
+	},
+
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	-- Unused Options
@@ -1406,16 +1415,6 @@ local options={
 		desc	= "Game Modes",
 		hidden = true,
 		type	= "section",
-	},
-
-	{
-		key		= "unba",
-		name	= "Unbalanced Commanders",
-		desc	= "Defines if commanders level up with xp and gain more power or not",
-		hidden = true,
-		type	= "bool",
-		def		= false,
-		section	= "modes",
 	},
 
 

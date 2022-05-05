@@ -24,13 +24,13 @@ return {
 		collisionvolumetest = 1,
 		collisionvolumetype = "box",
 		defaultmissiontype = "Standby",
-		explodeas = "QUEEN_DEATH",
+		explodeas = "crawl_blastsmlscavboss",
 		footprintx = 3,
 		footprintz = 3,
 		leavetracks = true,
 		maneuverleashlength = 2000,
 		mass = 2000000,
-		maxdamage = 4500000,
+		maxdamage = 2250000,
 		maxslope = 40,
 		maxvelocity = 4.25,
 		maxwaterdepth = 0,
@@ -40,8 +40,8 @@ return {
 		objectname = "Chickens/epic_chickenq.s3o",
 		pushresistant = true,
 		script = "Chickens/epic_chickenq.cob",
-		seismicsignature = 4,
-		selfdestructas = "QUEEN_DEATH",
+		seismicsignature = 0,
+		selfdestructas = "crawl_blastsmlscavboss",
 		side = "THUNDERBIRDS",
 		sightdistance = 2000,
 		smoothanim = true,
@@ -113,7 +113,7 @@ return {
 				weapontimer = 0.2,
 				weaponvelocity = 900,
 				damage = {
-					default = 1300,
+					default = 450,
 				},
 			},
 			melee = {
@@ -143,7 +143,7 @@ return {
 				weapontype = "Cannon",
 				weaponvelocity = 2500,
 				damage = {
-					default = 1400,
+					default = 450,
 				},
 			},
 			spores1 = {
@@ -189,7 +189,7 @@ return {
 				weaponvelocity = 4000,
 				wobble = 64000,
 				damage = {
-					default = 285,
+					default = 100,
 				},
 			},
 			spores2 = {
@@ -235,7 +235,7 @@ return {
 				weaponvelocity = 4000,
 				wobble = 64000,
 				damage = {
-					default = 700,
+					default = 250,
 				},
 			},
 			spores3 = {
@@ -281,7 +281,7 @@ return {
 				weaponvelocity = 4000,
 				wobble = 64000,
 				damage = {
-					default = 285,
+					default = 100,
 				},
 			},
 		},
