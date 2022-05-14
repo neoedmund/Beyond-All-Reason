@@ -34,6 +34,11 @@ return {
 	  version = '0.62 alvaro',
   },
   {
+    name = 'SCENARIO1',
+    desc = 'dedicated scenarios pseudo ai based on the shard FW',
+	  version = '0.01',
+  },
+  {
     name = 'ControlModeAI',
     desc = 'AI designed for Control Points gamemode, stays idle if control mode is disabled',
   },
