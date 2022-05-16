@@ -10,6 +10,7 @@ function widget:GetInfo()
 	}
 end
 
+local scrollingWhenChatInput = true
 local vsx, vsy = gl.GetViewSizes()
 local posY = 0.81
 local posX = 0.3
@@ -18,8 +19,9 @@ local charSize = 21 - (3.5 * ((vsx/vsy) - 1.78))
 local consoleFontSizeMult = 0.85
 local maxLines = 5
 local maxConsoleLines = 2
-local maxLinesScroll = 15
-local lineHeightMult = 1.33
+local maxLinesScrollFull = 16
+local maxLinesScrollChatInput = 9
+local lineHeightMult = 1.36
 local lineTTL = 40
 local backgroundOpacity = 0.18
 local handleTextInput = true	-- handle chat text input instead of using spring's input method
@@ -31,6 +33,7 @@ local ui_scale = tonumber(Spring.GetConfigFloat("ui_scale",1) or 1)
 local ui_opacity = tonumber(Spring.GetConfigFloat("ui_opacity",0.66) or 0.66)
 local widgetScale = (((vsx*0.3 + (vsy*2.33)) / 2000) * 0.55) * (0.95+(ui_scale-1)/1.5)
 
+local maxLinesScroll = maxLinesScrollFull
 local hide = false
 local fontsizeMult = 1
 local usedFontSize = charSize*widgetScale*fontsizeMult
@@ -495,17 +498,17 @@ local function addChat(gameFrame, lineType, name, text, isLive)
 	if lineType == 1 and sfind(text, 'I sent ', nil, true) then
 		if sfind(text, ' metal to ', nil, true) then
 			sendMetal = tonumber(string.match(ssub(text, sfind(text, 'I sent ')+7), '([0-9]*)'))
-			local receiver = teamcolorPlayername(ssub(text, sfind(text, ' metal to ')+10))
-			--text = ssub(text, 1, sfind(text, 'I sent ')-1)..' shared: '..sendMetal..' metal to '..receiver
+			local playername = teamcolorPlayername(ssub(text, sfind(text, ' metal to ')+10))
+			--text = ssub(text, 1, sfind(text, 'I sent ')-1)..' shared: '..sendMetal..' metal to '..playername
 			--msgColor = ssub(text, 1, sfind(text, 'I sent ')-1)
-			text = msgColor..'shared '..msgHighlightColor..sendMetal..msgColor..' metal to '..receiver
+			text = msgColor..'shared '..msgHighlightColor..sendMetal..msgColor..' metal to '..playername
 			lineType = 5
 		elseif sfind(text, ' energy to ', nil, true) then
 			sendEnergy = tonumber(string.match(ssub(text, sfind(text, 'I sent ')+7), '([0-9]*)'))
-			local receiver = teamcolorPlayername(ssub(text, sfind(text, ' energy to ')+11))	-- no dot stripping needed here
-			--text = ssub(text, 1, sfind(text, 'I sent ')-1)..' shared: '..sendEnergy..' energy to '..receiver
+			local playername = teamcolorPlayername(ssub(text, sfind(text, ' energy to ')+11))	-- no dot stripping needed here
+			--text = ssub(text, 1, sfind(text, 'I sent ')-1)..' shared: '..sendEnergy..' energy to '..playername
 			--msgColor = ssub(text, 1, sfind(text, 'I sent ')-1)
-			text = msgColor..'shared '..msgHighlightColor..sendEnergy..msgColor..' energy to '..receiver
+			text = msgColor..'shared '..msgHighlightColor..sendEnergy..msgColor..' energy to '..playername
 			lineType = 5
 		end
 
@@ -513,18 +516,27 @@ local function addChat(gameFrame, lineType, name, text, isLive)
 	elseif lineType == 1 and sfind(text, 'I gave ', nil, true) then
 		if sfind(text, ' units to ', nil, true) then
 			sendUnits = tonumber(string.match(ssub(text, sfind(text, 'I gave ')+7), '([0-9]*)'))
-			local receiver = teamcolorPlayername(ssub(text, sfind(text, ' units to ')+10, slen(text)-1))	-- adding "slen(text)-1" to strip the dot.
-			--text = ssub(text, 1, sfind(text, 'I gave ')-1)..' shared: '..sendUnits..' units to '..receiver
+			local playername = teamcolorPlayername(ssub(text, sfind(text, ' units to ')+10, slen(text)-1))	-- adding "slen(text)-1" to strip the dot.
+			--text = ssub(text, 1, sfind(text, 'I gave ')-1)..' shared: '..sendUnits..' units to '..playername
 			--msgColor = ssub(text, 1, sfind(text, 'I gave ')-1)
-			text = msgColor..'shared '..msgHighlightColor..sendUnits..msgColor..' '..(sendUnits == 1 and 'unit' or 'units')..' to '..receiver
+			text = msgColor..'shared '..msgHighlightColor..sendUnits..msgColor..' '..(sendUnits == 1 and 'unit' or 'units')..' to '..playername
 			lineType = 5
 		end
 
 	-- player taken
 	elseif lineType == 1 and sfind(text, 'I took ', nil, true) then	--<StarDoM> Allies: I took  --- .
 		if sfind(text, 'I took ', nil, true) then
-			local receiver = teamcolorPlayername(ssub(text, sfind(text, 'I took ')+8, slen(text)-2))	-- adding "slen(text)-2" to strip the space+dot.
-			text = msgColor..'took '..receiver
+			local playernameStart = sfind(text, 'I took ')+7
+			local playername = ssub(text, playernameStart, slen(text)-1) -- strip dot.
+			local colonChar = sfind(playername, ':')
+			local addition = ''
+			if colonChar then
+				local leftover = playername
+				playername = ssub(playername, 1, colonChar-1)
+				addition = msgColor..ssub(leftover, colonChar)
+			end
+			playername = teamcolorPlayername(playername)
+			text = msgColor..'took '..playername..addition
 			lineType = 5
 		end
 	end
@@ -575,6 +587,10 @@ end
 
 local function cancelChatInput()
 	showTextInput = false
+	if scrollingWhenChatInput then
+		scrolling = false
+		currentChatLine = #chatLines
+	end
 	inputText = ''
 	inputTextPosition = 0
 	inputTextInsertActive = false
@@ -619,6 +635,12 @@ function widget:Initialize()
 	end
 	WG['chat'].getHide = function()
 		return hide
+	end
+	WG['chat'].setChatInputScrolling = function(value)
+		scrollingWhenChatInput = value
+	end
+	WG['chat'].getChatInputScrolling = function()
+		return scrollingWhenChatInput
 	end
 	WG['chat'].setInputButton = function(value)
 		inputButton = value
@@ -727,9 +749,14 @@ function widget:Update(dt)
 
 	local x,y,b = Spring.GetMouseState()
 
+	if topbarArea then
+		scrollingPosY = floor(topbarArea[2] - elementMargin - backgroundPadding - backgroundPadding - (lineHeight*maxLinesScroll)) / vsy
+	end
+
 	local chatlogHeightDiff = scrolling and floor(vsy*(scrollingPosY-posY)) or 0
 	if WG['topbar'] and WG['topbar'].showingQuit() then
 		scrolling = false
+		currentChatLine = #chatLines
 	elseif math_isInRect(x, y, activationArea[1], activationArea[2], activationArea[3], activationArea[4]) then
 		local alt, ctrl, meta, shift = Spring.GetModKeyState()
 		if ctrl and shift then
@@ -738,12 +765,15 @@ function widget:Update(dt)
 			else
 				scrolling = 'chat'
 			end
+			maxLinesScroll = maxLinesScrollFull
 		end
 	elseif scrolling and math_isInRect(x, y, activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[2]) then
 		-- do nothing
 	else
-		scrolling = false
-		currentChatLine = #chatLines
+		if not scrollingWhenChatInput or not showTextInput then
+			scrolling = false
+			currentChatLine = #chatLines
+		end
 	end
 end
 
@@ -770,7 +800,7 @@ end
 local function processConsoleLine(i)
 	if consoleLines[i].lineDisplayList == nil then
 		glDeleteList(consoleLines[i].lineDisplayList)
-		local fontHeightOffset = usedFontSize*0.24
+		local fontHeightOffset = usedFontSize*0.3
 		consoleLines[i].lineDisplayList = glCreateList(function()
 			font:Begin()
 			font:Print(consoleLines[i].text, 0, fontHeightOffset, usedConsoleFontSize, "o")
@@ -788,7 +818,7 @@ end
 local function processLine(i)
 	if chatLines[i].lineDisplayList == nil then
 		glDeleteList(chatLines[i].lineDisplayList)
-		local fontHeightOffset = usedFontSize*0.24
+		local fontHeightOffset = usedFontSize*0.3
 		chatLines[i].lineDisplayList = glCreateList(function()
 			font:Begin()
 			if chatLines[i].gameFrame then
@@ -796,11 +826,11 @@ local function processLine(i)
 					-- player name
 					font:Print(chatLines[i].playerName, maxPlayernameWidth, fontHeightOffset, usedFontSize, "or")
 					-- divider
-					font:Print(pointSeparator, maxPlayernameWidth+(lineSpaceWidth/2), 0, usedFontSize, "oc")
+					font:Print(pointSeparator, maxPlayernameWidth+(lineSpaceWidth/2), fontHeightOffset*0.07, usedFontSize, "oc")
 				elseif chatLines[i].lineType == 5 then -- system message: sharing resources, taken player
 					-- player name
 					font3:Begin()
-					font3:Print(chatLines[i].playerName, maxPlayernameWidth, fontHeightOffset, usedFontSize*0.9, "or")
+					font3:Print(chatLines[i].playerName, maxPlayernameWidth, fontHeightOffset*1.2, usedFontSize*0.9, "or")
 					font3:End()
 				else
 					-- player name
@@ -811,7 +841,7 @@ local function processLine(i)
 			end
 			if chatLines[i].lineType == 5 then -- system message: sharing resources, taken player
 				font3:Begin()
-				font3:Print(chatLines[i].text, maxPlayernameWidth+lineSpaceWidth-(usedFontSize*0.5), fontHeightOffset, usedFontSize*0.88, "o")
+				font3:Print(chatLines[i].text, maxPlayernameWidth+lineSpaceWidth-(usedFontSize*0.5), fontHeightOffset*1.2, usedFontSize*0.88, "o")
 				font3:End()
 			else
 				font:Print(chatLines[i].text, maxPlayernameWidth+lineSpaceWidth, fontHeightOffset, usedFontSize, "o")
@@ -847,6 +877,9 @@ end
 
 local function drawChatInput()
 	if showTextInput then
+		if topbarArea then
+			scrollingPosY = floor(topbarArea[2] - elementMargin - backgroundPadding - backgroundPadding - (lineHeight*maxLinesScroll)) / vsy
+		end
 		updateTextInputDlist = false
 		textInputDlist = glDeleteList(textInputDlist)
 		textInputDlist = glCreateList(function()
@@ -1050,7 +1083,7 @@ function widget:DrawScreen()
 		return
 	end
 
-	if math_isInRect(x, y, activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[4]) or  (scrolling and math_isInRect(x, y, activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[2]))  then
+	if (scrollingWhenChatInput and showTextInput) or math_isInRect(x, y, activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[4]) or  (scrolling and math_isInRect(x, y, activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[2]))  then
 		hovering = true
 		if scrolling then
 			UiElement(activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[4])
@@ -1082,9 +1115,11 @@ function widget:DrawScreen()
 			)
 		end
 	else
-		hovering = false
-		scrolling = false
-		currentChatLine = #chatLines
+		if not scrollingWhenChatInput or not showTextInput then
+			hovering = false
+			scrolling = false
+			currentChatLine = #chatLines
+		end
 	end
 
 	-- draw background
@@ -1096,9 +1131,9 @@ function widget:DrawScreen()
 		glColor(0,0,0,backgroundOpacity)
 		--RectRound(activationArea[1], activationArea[2]+chatlogHeightDiff, activationArea[3], activationArea[4], elementCorner)
 		RectRound(activationArea[1], activationArea[2], activationArea[3], activationArea[2]+((displayedChatLines+1)*lineHeight)+(displayedChatLines==maxLines and 0 or elementPadding), elementCorner)
-		if hovering and Spring.GetGameFrame() < 30*60*7 then
+		if hovering then --and Spring.GetGameFrame() < 30*60*7 then
 			font:Begin()
-			font:SetTextColor(0.1,0.1,0.1,0.6)
+			font:SetTextColor(0.1,0.1,0.1,0.66)
 			font:Print(Spring.I18N('ui.chat.shortcut'), activationArea[3]-elementPadding-elementPadding, activationArea[2]+elementPadding+elementPadding, usedConsoleFontSize, "r")
 			font:End()
 		end
@@ -1421,6 +1456,10 @@ function widget:KeyPress(key, mods, isRepeat)
 		elseif key == 13 then -- RETURN	 (keypad enter = 271)
 			cancelChatInput()
 			showTextInput = true
+			if scrollingWhenChatInput then
+				scrolling = 'chat'
+				maxLinesScroll = maxLinesScrollChatInput
+			end
 			widgetHandler:OwnText()
 			if not inputHistory[inputHistoryCurrent] or inputHistory[inputHistoryCurrent] ~= '' then
 				inputHistoryCurrent = inputHistoryCurrent + 1
@@ -1840,7 +1879,7 @@ function widget:ViewResize()
 
 	local posY2 = 0.94
 	if WG['topbar'] ~= nil then
-		local topbarArea = WG['topbar'].GetPosition()
+		topbarArea = WG['topbar'].GetPosition()
 		posY2 = floor(topbarArea[2] - elementMargin)/vsy
 		posX = topbarArea[1]/vsx
 		scrollingPosY = floor(topbarArea[2] - elementMargin - backgroundPadding - backgroundPadding - (lineHeight*maxLinesScroll)) / vsy
@@ -1903,6 +1942,7 @@ function widget:GetConfigData(data)
 		handleTextInput = handleTextInput,
 		inputButton = inputButton,
 		hide = hide,
+		scrollingWhenChatInput = scrollingWhenChatInput,
 		version = 1,
 	}
 end
@@ -1925,6 +1965,9 @@ function widget:SetConfigData(data)
 	end
 	if data.hide ~= nil then
 		hide = data.hide
+	end
+	if data.scrollingWhenChatInput ~= nil then
+		scrollingWhenChatInput = data.scrollingWhenChatInput
 	end
 	if data.maxLines ~= nil then
 		maxLines = data.maxLines
