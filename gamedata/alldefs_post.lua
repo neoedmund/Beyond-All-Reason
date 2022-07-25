@@ -104,14 +104,21 @@ function UnitDef_Post(name, uDef)
 	uDef.flankingbonusmin = Spring.GetModOptions().experimentalflankingbonusmin*0.01
 	uDef.flankingbonusmax = Spring.GetModOptions().experimentalflankingbonusmax*0.01
 
+	-- Reverse Gear
+	if Spring.GetModOptions().experimentalreversegear == true then
+		if (not uDef.canfly) and uDef.maxvelocity then
+			uDef.maxreversevelocity = uDef.maxvelocity*0.65
+		end
+	end
+
 	-- Rebalance Candidates
-	
-	if Spring.GetModOptions().experimentalrebalancet2labs == true then -- 
+
+	if Spring.GetModOptions().experimentalrebalancet2labs == true then --
 		if name == "coralab" or name == "coravp" or name == "armalab" or name == "armavp" then
 			uDef.buildcostmetal = 1800 --2900
 		end
 		if name == "coraap" or name == "corasy" or name == "armaap" or name == "armasy" then
-			uDef.buildcostmetal = 2100 --3200 
+			uDef.buildcostmetal = 2100 --3200
 		end
 	end
 
@@ -150,7 +157,7 @@ function UnitDef_Post(name, uDef)
 			local numBuildoptions = #uDef.buildoptions
 			uDef.buildoptions[numBuildoptions+1] = "corwint2"
 		end
-	end 
+	end
 
 	if Spring.GetModOptions().experimentalrebalancehovercrafttech == true then
 		if name == "corhp" or name == "corfhp" or name == "armhp" or name == "armfhp" then
@@ -172,36 +179,51 @@ function UnitDef_Post(name, uDef)
 	end
 
 	---------------------------------------------------------------------------------------------------
-	
+
 	if Spring.GetModOptions().newdgun then
-		if name == 'armcom' or name == 'corcom' or name == 'armcomcon' or name == 'corcomcon' then
-			local dgun = uDef.weapondefs.disintegrator
-			dgun.cratermult = 0.05
-			dgun.edgeeffectiveness = 1
-			dgun.damage = {
-				default = 99999,
-				commanders = 100,
-				scavboss = 1000,
-			}
+		if uDef.customparams.iscommander then
+			uDef.customparams.paralyzemultiplier = 0
 
-			local laser = uDef.weapondefs.armcomlaser or uDef.weapondefs.corcomlaser
-			local uwLaser = uDef.weapondefs.armcomsealaser or uDef.weapondefs.corcomsealaser
-			laser.damage = {
-				bombers = 180,
-				default = 75,
-				fighters = 110,
-				subs = 5,
-				commanders = 25,
-			}
-
-			uwLaser.damage = {
-				default = 200,
-				subs = 100,
-				commanders = 60,
-			}
+			if uDef.weapondefs.disintegrator then
+				uDef.weapondefs.disintegrator = {
+					areaofeffect = 160,
+					avoidfeature = false,
+					commandfire = true,
+					craterboost = 0,
+					cratermult = 0,
+					edgeeffectiveness = 1,
+					explosiongenerator = "custom:genericshellexplosion-large-lightning",
+					gravityaffected = "true",
+					impulseboost = 0.001,
+					impulsefactor = 0.001,
+					model = "airbomb.s3o",
+					name = "EMP Grenade",
+					noselfdamage = true,
+					paralyzer = true,
+					paralyzetime = 5.5,
+					range = 320,
+					reloadtime = 7,
+					soundhit = "EMGPULS1",
+					soundhitwet = "splslrg",
+					soundstart = "bombrel",
+					turret = true,
+					weapontype = "Cannon",
+					weaponvelocity = 240,
+					customparams = {
+						expl_light_color = "0.5 0.5 1",
+						expl_light_mult = 1.2,
+						expl_light_radius_mult = 0.9,
+						expl_light_life_mult = 1.55,
+						expl_light_heat_life_mult = "1.6",
+					},
+					damage = {
+						default = 10000,
+					},
+				}
+			end
 		end
 	end
-	
+
 	-- Control Mode Tweaks
 	if Spring.GetModOptions().scoremode ~= "disabled" then
 		if Spring.GetModOptions().scoremode_chess == true then
@@ -243,7 +265,7 @@ function UnitDef_Post(name, uDef)
 				armnanotcplat = true,
 				cornanotc = true,
 				cornanotcplat = true,
-				armbotrail = true, -- it spawns units so it will add dead launched peewees to respawn queue. 
+				armbotrail = true, -- it spawns units so it will add dead launched peewees to respawn queue.
 			}
 			if factories[name] then
 				uDef.unitrestricted = 0
@@ -330,7 +352,7 @@ function UnitDef_Post(name, uDef)
 				uDef.unitrestricted = 0
 			end
 		end
-		
+
 		if Spring.GetModOptions().unit_restrictions_noconverters then
 			if uDef.customparams.energyconv_capacity and uDef.customparams.energyconv_efficiency then
 				uDef.unitrestricted = 0
@@ -542,8 +564,14 @@ function UnitDef_Post(name, uDef)
 		if (uDef.mass and uDef.mass < 500) or not uDef.mass then uDef.mass = 500 end
 		uDef.canhover = true
 		uDef.autoheal = math.ceil(math.sqrt(chickHealth * 0.1))
+		uDef.customparams.paralyzemultiplier = uDef.customparams.paralyzemultiplier or .2
 		uDef.idleautoheal = math.ceil(math.sqrt(chickHealth * 0.1))
 		uDef.customparams.areadamageresistance = "_CHICKENACID_"
+		uDef.upright = false
+		uDef.floater = true
+		if (not uDef.canfly) and uDef.maxvelocity then
+			uDef.maxreversevelocity = uDef.maxvelocity*0.65
+		end
 	end
 
 	if (uDef.buildpic and uDef.buildpic == "") or not uDef.buildpic then
@@ -722,6 +750,13 @@ function UnitDef_Post(name, uDef)
     --	end
     --end
 
+	-- Unbacom
+
+	if Spring.GetModOptions().unba == true then
+		unbaUnits = VFS.Include("unbaconfigs/unbaunits_post.lua")
+		uDef = unbaUnits.unbaUnitTweaks(name, uDef)
+	end
+
 	-- Multipliers Modoptions
 
 	-- Health
@@ -778,12 +813,9 @@ function UnitDef_Post(name, uDef)
 		if x ~= 1 then
 			uDef.workertime = uDef.workertime*x
 		end
-		
+
 		-- increase terraformspeed to be able to restore ground faster
 		uDef.terraformspeed = uDef.workertime * 30
-		if Spring.GetModOptions().map_waterlevel ~= 0 then
-			uDef.canrestore = false
-		end
 	end
 
 	-- Unit Cost
@@ -817,7 +849,7 @@ function UnitDef_Post(name, uDef)
 	if uDef.airsightdistance then
 		local x = Spring.GetModOptions().multiplier_losrange
 		if x ~= 1 then
-			uDef.airsightdistance = uDef.airsightdistance*x	
+			uDef.airsightdistance = uDef.airsightdistance*x
 		end
 	end
 
@@ -835,10 +867,6 @@ function UnitDef_Post(name, uDef)
 		end
 	end
 
-	if Spring.GetModOptions().unba == true then
-		unbaUnits = VFS.Include("unbaconfigs/unbaunits_post.lua")
-		uDef = unbaUnits.unbaUnitTweaks(name, uDef)
-	end
 	-- add model vertex displacement
 	local vertexDisplacement = 5.5 + ((uDef.footprintx + uDef.footprintz) / 12)
 	if vertexDisplacement > 10 then
@@ -991,46 +1019,6 @@ function WeaponDef_Post(name, wDef)
 			wDef.texture4 = "flare2"	-- Flare texture for #BeamLaser with largeBeamLaser = true
 		end
 
-
-
-		-- Multipliers
-
-		-- Weapon Range 
-		if true then -- dumb way to keep the x local here
-			local x = Spring.GetModOptions().multiplier_weaponrange
-			if x ~= 1 then
-				if wDef.range then
-					wDef.range = wDef.range*x
-				end
-				if wDef.flighttime then
-					wDef.flighttime = wDef.flighttime*(x*1.5)
-				end
-				-- if wDef.mygravity and wDef.mygravity ~= 0 then
-				-- 	wDef.mygravity = wDef.mygravity*(1/x)
-				-- else
-				-- 	wDef.mygravity = 0.12 -- this is some really weird number totally not related to numbers defined in map file
-				-- end
-				if wDef.weaponvelocity and wDef.weapontype == "Cannon" and wDef.gravityaffected == "true" then
-					wDef.weaponvelocity = wDef.weaponvelocity*x
-				end
-				if wDef.weapontype == "StarburstLauncher" and wDef.weapontimer then
-					wDef.weapontimer = wDef.weapontimer*x
-				end
-			end
-		end
-
-		-- Weapon Damage
-		if true then -- dumb way to keep the x local here
-			local x = Spring.GetModOptions().multiplier_weapondamage
-			if x ~= 1 then
-				if wDef.damage then
-					for damageClass, damageValue in pairs(wDef.damage) do
-						wDef.damage[damageClass] = wDef.damage[damageClass] * x
-					end
-				end
-			end
-		end
-
 		-- scavengers
 		if string.find(name, '_scav') then
 			VFS.Include("gamedata/scavengers/weapondef_post.lua")
@@ -1042,6 +1030,44 @@ function WeaponDef_Post(name, wDef)
 	if Spring.GetModOptions().unba == true then
 		unbaUnits = VFS.Include("unbaconfigs/unbaunits_post.lua")
 		wDef = unbaUnits.unbaWeaponTweaks(name, wDef)
+	end
+
+	-- Multipliers
+
+	-- Weapon Range
+	if true then -- dumb way to keep the x local here
+		local x = Spring.GetModOptions().multiplier_weaponrange
+		if x ~= 1 then
+			if wDef.range then
+				wDef.range = wDef.range*x
+			end
+			if wDef.flighttime then
+				wDef.flighttime = wDef.flighttime*(x*1.5)
+			end
+			-- if wDef.mygravity and wDef.mygravity ~= 0 then
+			-- 	wDef.mygravity = wDef.mygravity*(1/x)
+			-- else
+			-- 	wDef.mygravity = 0.12 -- this is some really weird number totally not related to numbers defined in map file
+			-- end
+			if wDef.weaponvelocity and wDef.weapontype == "Cannon" and wDef.gravityaffected == "true" then
+				wDef.weaponvelocity = wDef.weaponvelocity*x
+			end
+			if wDef.weapontype == "StarburstLauncher" and wDef.weapontimer then
+				wDef.weapontimer = wDef.weapontimer+(wDef.weapontimer*((x-1)*0.4))
+			end
+		end
+	end
+
+	-- Weapon Damage
+	if true then -- dumb way to keep the x local here
+		local x = Spring.GetModOptions().multiplier_weapondamage
+		if x ~= 1 then
+			if wDef.damage then
+				for damageClass, damageValue in pairs(wDef.damage) do
+					wDef.damage[damageClass] = wDef.damage[damageClass] * x
+				end
+			end
+		end
 	end
 end
 -- process effects

@@ -19,7 +19,7 @@ return {
 		collisionvolumescales = "25 34 44",
 		collisionvolumetype = "box",
 		defaultmissiontype = "Standby",
-		explodeas = "LOBBER_MORPH",
+		explodeas = "BIGBUG_DEATH",
 		footprintx = 3,
 		footprintz = 3,
 		hidedamage = 1,
@@ -39,7 +39,7 @@ return {
 		objectname = "Chickens/chickenr1.s3o",
 		script = "Chickens/chickenr1.cob",
 		seismicsignature = 0,
-		selfdestructas = "LOBBER_MORPH",
+		selfdestructas = "BIGBUG_DEATH",
 		side = "THUNDERBIRDS",
 		sightdistance = 1250,
 		smoothanim = true,
@@ -78,7 +78,7 @@ return {
 		},
 		weapondefs = {
 			goolauncher = {
-				accuracy = 1024,
+				accuracy = 256,
 				areaofeffect = 256,
 				collidefriendly = 0,
 				collidefeature = 0,
@@ -101,7 +101,7 @@ return {
 				noselfdamage = true,
 				proximitypriority = -4,
 				range = 1250,
-				reloadtime = 2,
+				reloadtime = 8,
 				rgbcolor = "1 0.5 0.1",
 				size = 5.5,
 				sizedecay = 0.09,
@@ -113,7 +113,8 @@ return {
 				weapontimer = 0.2,
 				weaponvelocity = 520,
 				damage = {
-					default = 800,
+					default = 3200,
+					shields = 800,
 				},
 				customparams = {
 					expl_light_life_mult = 1.0,

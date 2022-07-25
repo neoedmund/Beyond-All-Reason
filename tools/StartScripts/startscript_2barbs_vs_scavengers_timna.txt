@@ -103,7 +103,7 @@
 	mapname = Timna Island 1.0;
 	ishost = 1;
 	numusers = 4;
-	gametype = Beyond All Reason $VERSION;
+	gametype = Beyond All Reason neoe neoelocal;
 	GameStartDelay = 5;
 	myplayername = [teh]Beherith;
 	nohelperais = 0;

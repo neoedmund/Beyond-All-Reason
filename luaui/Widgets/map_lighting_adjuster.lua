@@ -102,6 +102,21 @@ local mapSunLighting = {
 		unitDiffuseColor = {1, 0.88, 0.8},
 		unitSpecularColor = {1, 0.88, 0.8},
 	},
+	['forge v1.2'] = {
+		unitAmbientColor = { 0.45, 0.45, 0.45 },
+		unitDiffuseColor = {0.4, 0.4, 0.4},
+		unitSpecularColor = {0.65, 0.5, 0.5},
+	},
+	['bismuth valley v1.0'] = {
+		unitAmbientColor = { 0.45, 0.45, 0.45 },
+		unitDiffuseColor = {0.75, 0.75, 0.7},
+	},
+	['all that glitters v1.2'] = {
+		groundDiffuseColor = { 0.4, 0.65, 0.6 },
+		unitAmbientColor = { 0.45, 0.45, 0.45 },
+		unitDiffuseColor = {1.0, 0.7, 0.7},
+		unitSpecularColor = {1.0, 0.5, 0.5},
+	},
 }
 
 local mapSun = {

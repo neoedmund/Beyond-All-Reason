@@ -41,8 +41,13 @@ Spring.SendCommands({
 })
 
 local allowuserwidgets = Spring.GetModOptions().allowuserwidgets
+
 if Spring.GetModOptions().teamcolors_anonymous_mode then
 	allowuserwidgets = false
+
+	-- disabling individual Spring functions isnt really good enough
+	-- disabling user widget draw access would probably do the job but that wouldnt be easy to do
+	Spring.SetTeamColor = function() return true end
 end
 
 widgetHandler = {
@@ -643,6 +648,22 @@ end
 local function SafeWrapFuncNoGL(func, funcName)
 	local wh = widgetHandler
 	return function(w, ...)
+		-- New method avoids needless table creation, but is limited to at most 2 return values per callin!
+		local r1, r2, r3 = pcall(func, w, ...) 
+		if r1 then
+			return r2, r3
+		else
+			if funcName ~= 'Shutdown' then
+				widgetHandler:RemoveWidget(w)
+			else
+				Spring.Echo('Error in Shutdown()')
+			end
+			local name = w.whInfo.name
+			Spring.Echo('Error in ' .. funcName .. '(): ' .. tostring(r2))
+			Spring.Echo('Removed widget: ' .. name)
+			return nil
+		end
+		--[[
 		local r = { pcall(func, w, ...) }
 		if r[1] then
 			table.remove(r, 1)
@@ -659,6 +680,7 @@ local function SafeWrapFuncNoGL(func, funcName)
 			Spring.Echo('Removed widget: ' .. name)
 			return nil
 		end
+		]]--
 	end
 end
 
@@ -1368,46 +1390,46 @@ end
 --  Keyboard call-ins
 --
 
-function widgetHandler:KeyPress(key, mods, isRepeat, label, unicode)
+function widgetHandler:KeyPress(key, mods, isRepeat, label, unicode, scanCode)
 	local textOwner = self.textOwner
 
 	if textOwner then
 		if textOwner.KeyPress then
-			textOwner:KeyPress(key, mods, isRepeat, label, unicode)
+			textOwner:KeyPress(key, mods, isRepeat, label, unicode, scanCode)
 		end
 
 		return true
 	end
 
-	if self.actionHandler:KeyAction(true, key, mods, isRepeat) then
+	if self.actionHandler:KeyAction(true, key, mods, isRepeat, scanCode) then
 		return true
 	end
 
 	for _, w in ipairs(self.KeyPressList) do
-		if w:KeyPress(key, mods, isRepeat, label, unicode) then
+		if w:KeyPress(key, mods, isRepeat, label, unicode, scanCode) then
 			return true
 		end
 	end
 	return false
 end
 
-function widgetHandler:KeyRelease(key, mods, label, unicode)
+function widgetHandler:KeyRelease(key, mods, label, unicode, scanCode)
 	local textOwner = self.textOwner
 
 	if textOwner then
 		if textOwner.KeyRelease then
-			textOwner:KeyRelease(key, mods, label, unicode)
+			textOwner:KeyRelease(key, mods, label, unicode, scanCode)
 		end
 
 		return true
 	end
 
-	if self.actionHandler:KeyAction(false, key, mods, false) then
+	if self.actionHandler:KeyAction(false, key, mods, false, scanCode) then
 		return true
 	end
 
 	for _, w in ipairs(self.KeyReleaseList) do
-		if w:KeyRelease(key, mods, label, unicode) then
+		if w:KeyRelease(key, mods, label, unicode, scanCode) then
 			return true
 		end
 	end
